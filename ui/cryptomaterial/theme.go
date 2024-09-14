@@ -7,6 +7,7 @@ import (
 	"image/color"
 
 	"gioui.org/io/key"
+	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
@@ -149,6 +150,25 @@ func (t *Theme) Surface(gtx layout.Context, w layout.Widget) layout.Dimensions {
 		}),
 		layout.Stacked(w),
 	)
+}
+
+func (t *Theme) ShowKeyboardIfEditorFocused(gtx C) bool {
+	for _, e := range t.allEditors {
+		for {
+			ev, ok := gtx.Event(pointer.Filter{
+				Target: e.Editor,
+				Kinds:  pointer.Release,
+			})
+			if !ok {
+				break
+			}
+			if _, ok := ev.(pointer.Event); ok {
+				gtx.Execute(key.SoftKeyboardCmd{Show: true})
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func (t *Theme) ImageIcon(gtx layout.Context, icon image.Image, size int) layout.Dimensions {
